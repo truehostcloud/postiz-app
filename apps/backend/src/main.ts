@@ -1,3 +1,4 @@
+import './apm.init';
 import { initializeSentry } from '@gitroom/nestjs-libraries/sentry/initialize.sentry';
 initializeSentry('backend', true);
 

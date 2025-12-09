@@ -1,10 +1,10 @@
-name: Build and Publish PR Docker Image
+name: Build and Publish PR Docker Image (manual)
 
 on:
-  pull_request_target:
-    types: [opened, synchronize]
+  workflow_dispatch:
 
-permissions: write-all
+# Automatic PR image pushes are disabled in this fork (PR images not required).
+# Trigger this workflow manually if you ever need to build/push a PR image.
 
 jobs:
   build-and-publish:
