@@ -5,14 +5,14 @@ export class FusionAuthProvider implements ProvidersInterface {
   private clientId = process.env.FUSION_AUTH_CLIENT_ID!;
   private clientSecret = process.env.FUSION_AUTH_CLIENT_SECRET;
   private redirectUri =
-    process.env.FUSION_AUTH_REDIRECT_URI || `${process.env.FRONTEND_URL}/auth/sso/fusionauth`;
+    process.env.FUSION_AUTH_REDIRECT_URI || `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/sso/fusionauth`;
 
   generateLink() {
     const params = new URLSearchParams({
       client_id: this.clientId,
       response_type: 'code',
       scope: 'openid profile email',
-      redirect_uri: `${process.env.FRONTEND_URL}/settings`,
+      redirect_uri: this.redirectUri,
     });
 
     return `${this.issuer}/oauth2/authorize?${params.toString()}`;
@@ -44,7 +44,11 @@ export class FusionAuthProvider implements ProvidersInterface {
       throw new Error(`Token exchange failed: ${await res.text()}`);
     }
     const json = await res.json();
-    return json.access_token || json.id_token || '';
+    const token = json.access_token || json.id_token;
+    if (!token) {
+      throw new Error('Token not found in FusionAuth response');
+    }
+    return token;
   }
 
   async getUser(tokenOrIdToken: string): Promise<{ email: string; id: string }> {

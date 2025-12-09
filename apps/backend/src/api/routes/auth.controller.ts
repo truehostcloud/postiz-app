@@ -346,7 +346,12 @@ export class AuthController {
       }
 
       if (redirect) {
-        return response.redirect(302, redirect);
+        const allowedDomain = new URL(process.env.FRONTEND_URL!).hostname;
+        const redirectUrl = new URL(redirect, process.env.FRONTEND_URL!);
+        if (redirectUrl.hostname !== allowedDomain) {
+          return response.status(400).send('Invalid redirect domain');
+        }
+        return response.redirect(302, redirectUrl.toString());
       }
 
       response.header('reload', 'true');
