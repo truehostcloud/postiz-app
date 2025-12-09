@@ -11,7 +11,6 @@ if (typeof window !== 'undefined') {
       serviceName: process.env.NEXT_PUBLIC_ELASTIC_APM_SERVICE_NAME || 'postiz-frontend',
       serverUrl: process.env.ELASTIC_APM_SERVER_URL,
       environment: process.env.NEXT_PUBLIC_NODE_ENV || process.env.NODE_ENV || 'production',
-      captureExceptions: true,
       pageLoadTransactionName: 'route-change',
       breakdownMetrics: true,
       distributedTracingOrigins: [process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3000', 'http://localhost:4200'],
