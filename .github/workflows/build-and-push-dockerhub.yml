@@ -1,0 +1,86 @@
+name: Build and Push Docker Hub Images
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - staging
+      - dev
+
+jobs:
+  build-push:
+    name: Build and Push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set short SHA and tag base
+        id: set-vars
+        run: |
+          SHORT_SHA=$(git rev-parse --short=8 HEAD)
+          BRANCH=${GITHUB_REF#refs/heads/}
+          if [ "$BRANCH" = "main" ]; then
+            TAG_BASE=prod
+          elif [ "$BRANCH" = "staging" ] || [ "$BRANCH" = "dev" ]; then
+            TAG_BASE=dev
+          else
+            echo "Branch '$BRANCH' is not configured for Docker push. Exiting.";
+            exit 0
+          fi
+          echo "short_sha=$SHORT_SHA" >> "$GITHUB_OUTPUT"
+          echo "tag_base=$TAG_BASE" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare image tags
+        id: prepare-tags
+        run: |
+          TAG_BASE=${{ steps.set-vars.outputs.tag_base }}
+          SHORT_SHA=${{ steps.set-vars.outputs.short_sha }}
+          USER=${{ secrets.DOCKERHUB_USERNAME }}
+          TAGS="docker.io/${USER}/postiz-app:${TAG_BASE}\ndocker.io/${USER}/postiz-app:${TAG_BASE}-${SHORT_SHA}"
+          if [ "${TAG_BASE}" = "prod" ]; then
+            TAGS="${TAGS}\ndocker.io/${USER}/postiz-app:latest"
+          fi
+          echo "Preparing tags:\n$TAGS"
+          echo "tags<<EOF" >> $GITHUB_OUTPUT
+          echo -e "$TAGS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Build and push multi-arch image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: Dockerfile.dev
+          platforms: linux/amd64,linux/arm64
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          tags: ${{ steps.prepare-tags.outputs.tags }}
+          build-args: |
+            NEXT_PUBLIC_VERSION=${{ steps.set-vars.outputs.short_sha }}
+          labels: |
+            org.opencontainers.image.revision=${{ steps.set-vars.outputs.short_sha }}
+            org.opencontainers.image.source=${{ github.repository }}
+
+      - name: Verify pushed image (list)
+        run: |
+          echo "Pushed tags:"
+          echo "docker.io/${{ secrets.DOCKERHUB_USERNAME }}/postiz-app:${{ steps.set-vars.outputs.tag_base }}"
+          echo "docker.io/${{ secrets.DOCKERHUB_USERNAME }}/postiz-app:${{ steps.set-vars.outputs.tag_base }}-${{ steps.set-vars.outputs.short_sha }}"
