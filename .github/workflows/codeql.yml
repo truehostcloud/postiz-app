@@ -14,6 +14,9 @@ jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
 
+    # Upstream-only: forks often don't want/need security event uploads
+    if: github.repository == 'gitroomhq/postiz-app'
+
     runs-on: 'ubuntu-latest'
     permissions:
       security-events: write

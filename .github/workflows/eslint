@@ -21,6 +21,8 @@ on:
 jobs:
   eslint:
     name: Run eslint scanning
+    # Upstream-only: forks often don't want/need SARIF security uploads
+    if: github.repository == 'gitroomhq/postiz-app'
     runs-on: ubuntu-latest
     permissions:
       contents: read
