@@ -386,6 +386,24 @@ export class AuthController {
       response.header('reload', 'true');
       return response.status(200).json({ login: true });
     } catch (e: any) {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const apm = require('../../apm.init');
+        apm?.captureError?.(e instanceof Error ? e : new Error(String(e)), {
+          handled: true,
+          custom: {
+            provider,
+            providerUpper: typeof provider === 'string' ? provider.toUpperCase() : provider,
+            redirect,
+            ip,
+            userAgent,
+            hasToken: !!token,
+          },
+        });
+      } catch {
+        // Ignore APM/reporting failures; preserve redirect behavior.
+      }
+
       if (redirect) {
         const url = new URL(redirect, process.env.FRONTEND_URL || undefined);
         url.searchParams.set('sso', 'failed');
