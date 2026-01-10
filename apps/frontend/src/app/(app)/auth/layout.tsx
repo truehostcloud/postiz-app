@@ -14,25 +14,26 @@ export default async function AuthLayout({
 }) {
   const t = await getT();
 
+  const olittAppUrl = process.env.NEXT_PUBLIC_OLITT_APP_URL || '/';
+  
+
   return (
-    <div className="bg-[#0E0E0E] flex flex-1 p-[12px] gap-[12px] min-h-screen w-screen text-white">
-      {/*<style>{`html, body {overflow-x: hidden;}`}</style>*/}
+    <div className="bg-[#0E0E0E] flex justify-center items-center flex-1 p-[12px] gap-[12px] min-h-screen w-screen text-white">
       <ReturnUrlComponent />
-      <div className="flex flex-col py-[40px] px-[20px] flex-1 lg:w-[600px] lg:flex-none rounded-[12px] text-white p-[12px] bg-[#1A1919]">
-        <div className="w-full max-w-[440px] mx-auto justify-center gap-[20px] h-full flex flex-col text-white">
-          <LogoTextComponent />
-          <div className="flex">{children}</div>
-        </div>
-      </div>
-      <div className="text-[36px] flex-1 pt-[88px] hidden lg:flex flex-col items-center">
-        <div className="text-center">
-          Over <span className="text-[42px] text-[#FC69FF]">18,000+</span>{' '}
-          Entrepreneurs use
-          <br />
-          Postiz To Grow Their Social Presence
-        </div>
-        <TestimonialComponent />
-      </div>
+          <div className="flex justify-center items-center flex-col gap-4 text-start">
+            <h1 className="text-[32px] font-[600]">Continue in Olitt</h1>
+            <p className="text-[14px] text-[#cfcfcf] leading-6">
+              Please return to Olitt to start your login again.
+            </p>
+            <div>
+              <a
+                href={olittAppUrl}
+                className="inline-flex items-center  justify-center px-4 py-3 rounded-[10px] bg-white text-black font-[600] hover:opacity-90 transition-opacity"
+              >
+                Back to Olitt
+              </a>
+            </div>
+          </div>
     </div>
   );
 }

@@ -3,7 +3,6 @@ import { useUser } from '@gitroom/frontend/components/layout/user.context';
 import { useVariables } from '@gitroom/react/helpers/variable.context';
 import { useT } from '@gitroom/react/translation/get.transation.service.client';
 import { Logo } from '@gitroom/frontend/components/new-layout/logo';
-import { LogoutComponent } from '@gitroom/frontend/components/layout/logout.component';
 import React from 'react';
 import { OrganizationSelector } from '@gitroom/frontend/components/layout/organization.selector';
 
@@ -96,9 +95,6 @@ export const BillingAfter = () => {
         )}
       </div>
       <BillingComponent />
-      <div className="flex justify-center items-center mt-[20px]">
-        <LogoutComponent />
-      </div>
     </div>
   );
 };
